@@ -1,0 +1,14 @@
+{
+  "_zweck": "Text-zu-Video Lightning — deutlich schaerferes Animate-Diff via 8-Step-Distillation (ByteDance) + DreamShaper-8 (Lykon). 32 Frames via Context-Window. Upgrade von Workflow 03.",
+  "_prompt_setzen": "Node 3, inputs.text",
+  "_settings_pflicht": "Lightning braucht beta_schedule=lcm, sampler=euler, scheduler=sgm_uniform, steps=8, cfg=1.8 — sonst keine Wirkung.",
+  "1": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": "DreamShaper_8_pruned.safetensors"}},
+  "11": {"class_type": "ADE_StandardUniformContextOptions", "inputs": {"context_length": 16, "context_stride": 1, "context_overlap": 4}},
+  "2": {"class_type": "ADE_AnimateDiffLoaderGen1", "inputs": {"model": ["1", 0], "model_name": "animatediff_lightning_8step_comfyui.safetensors", "beta_schedule": "lcm", "context_options": ["11", 0]}},
+  "3": {"class_type": "CLIPTextEncode", "inputs": {"text": "PROMPT_HIER_SETZEN", "clip": ["1", 1]}},
+  "4": {"class_type": "CLIPTextEncode", "inputs": {"text": "blurry, low quality, watermark, text, deformed, low contrast, washed out, oversaturated", "clip": ["1", 1]}},
+  "5": {"class_type": "EmptyLatentImage", "inputs": {"width": 768, "height": 432, "batch_size": 32}},
+  "6": {"class_type": "KSampler", "inputs": {"model": ["2", 0], "positive": ["3", 0], "negative": ["4", 0], "latent_image": ["5", 0], "seed": 42, "steps": 8, "cfg": 1.8, "sampler_name": "euler", "scheduler": "sgm_uniform", "denoise": 1.0}},
+  "7": {"class_type": "VAEDecode", "inputs": {"samples": ["6", 0], "vae": ["1", 2]}},
+  "8": {"class_type": "VHS_VideoCombine", "inputs": {"images": ["7", 0], "frame_rate": 8, "loop_count": 0, "filename_prefix": "v3_lightning", "format": "video/h264-mp4", "pingpong": false, "save_output": true}}
+}
