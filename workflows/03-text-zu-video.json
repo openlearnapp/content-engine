@@ -1,0 +1,14 @@
+{
+  "_zweck": "Text-zu-Video — bewegter Clip aus einem Text-Prompt. SD 1.5 + AnimateDiff v3.",
+  "_prompt_setzen": "Node 3, inputs.text",
+  "_wichtig": "v3-Adapter-LoRA (Node 9) und beta_schedule sqrt_linear (Node 2) sind Pflicht, sonst abstraktes Ergebnis.",
+  "1": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": "v1-5-pruned-emaonly-fp16.safetensors"}},
+  "9": {"class_type": "LoraLoader", "inputs": {"model": ["1", 0], "clip": ["1", 1], "lora_name": "v3_sd15_adapter.ckpt", "strength_model": 1.0, "strength_clip": 1.0}},
+  "2": {"class_type": "ADE_AnimateDiffLoaderGen1", "inputs": {"model": ["9", 0], "model_name": "v3_sd15_mm.ckpt", "beta_schedule": "sqrt_linear (AnimateDiff)"}},
+  "3": {"class_type": "CLIPTextEncode", "inputs": {"text": "PROMPT_HIER_SETZEN", "clip": ["9", 1]}},
+  "4": {"class_type": "CLIPTextEncode", "inputs": {"text": "blurry, low quality, watermark, text, abstract, deformed, noise", "clip": ["9", 1]}},
+  "5": {"class_type": "EmptyLatentImage", "inputs": {"width": 512, "height": 512, "batch_size": 16}},
+  "6": {"class_type": "KSampler", "inputs": {"model": ["2", 0], "positive": ["3", 0], "negative": ["4", 0], "latent_image": ["5", 0], "seed": 42, "steps": 20, "cfg": 7.0, "sampler_name": "euler", "scheduler": "normal", "denoise": 1.0}},
+  "7": {"class_type": "VAEDecode", "inputs": {"samples": ["6", 0], "vae": ["1", 2]}},
+  "8": {"class_type": "VHS_VideoCombine", "inputs": {"images": ["7", 0], "frame_rate": 8, "loop_count": 0, "filename_prefix": "text_zu_video", "format": "video/h264-mp4", "pingpong": false, "save_output": true}}
+}
