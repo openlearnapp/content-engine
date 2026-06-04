@@ -63,11 +63,14 @@ Kleine Belege liegen in `results/`, große Renders außerhalb des Repos.
 - **Versuch 0** — Auswertung vorhandener Test-Videos (Stills vs. SVG) · erledigt
 - **Versuch 1** — Erstes KI-bewegtes Video (AnimateDiff) · erledigt
 - **Versuch 2** — Feste Workflow-Bibliothek + erste Produktions-Durchläufe · erledigt
-- **Versuch 3** — Schärfe steigern: stärkerer Checkpoint + ControlNet
-- **Versuch 4** — Bild-zu-Video mit LTX-Video
-- **Versuch 5** — End-to-End: Eingabe-Text → fertiges vertontes Video
+- **Versuch 3** — Schärfe-Sprung (Lightning + DreamShaper) + ElevenLabs-Vertonung · erledigt
+- **Versuch 4** — Schärfe weiter pushen (ControlNet Tile + 4×-UltraSharp Upscale)
+- **Versuch 5** — Bild-zu-Video mit LTX-Video
+- **Versuch 6** — Längere Clips (ausgedehntes Context-Window oder Mehrfach-Segmente)
+- **Versuch 7** — End-to-End-Fabrik: Lektions-Text → fertiges narriertes Workshop-Video
 
 ## Status
 
-Stand 2026-05-20. Werkzeuge installiert, Workflow-Bibliothek aufgebaut und
-produktiv getestet, Versuche 0 bis 2 ausgewertet.
+Stand 2026-05-24. Werkzeuge installiert, Workflow-Bibliothek aufgebaut und
+produktiv getestet, Versuche 0 bis 3 ausgewertet. Erstes vertontes KI-Video steht
+(`results/003-lightning-narrated/final-vertont.mp4`).

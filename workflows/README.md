@@ -11,8 +11,9 @@ damit die Qualität reproduzierbar bleibt.
 |---|---|---|---|
 | `01-hintergrund-plate.json` | Atmosphärischer Hintergrund / Backplate | SDXL | Standbild 1344×768 |
 | `02-szenen-bild.json` | Vollständige Szenen-Illustration mit Motiv | SDXL | Standbild 1344×768 |
-| `03-text-zu-video.json` | Text → bewegtes Video | SD 1.5 + AnimateDiff v3 | Clip, 16 Frames |
-| `04-bild-zu-video.json` | Standbild → Video *(geplant)* | LTX-Video 2B | Clip aus Standbild |
+| `03-text-zu-video.json` | Text → bewegtes Video (Baseline) | SD 1.5 + AnimateDiff v3 | Clip, 16 Frames |
+| `04-text-zu-video-lightning.json` | Text → bewegtes Video (schärfer, 32 Frames) | DreamShaper 8 + AnimateDiff Lightning | Clip, 32 Frames @ 8 fps |
+| `05-bild-zu-video.json` | Standbild → Video *(geplant)* | LTX-Video 2B | Clip aus Standbild |
 
 ## Format
 
