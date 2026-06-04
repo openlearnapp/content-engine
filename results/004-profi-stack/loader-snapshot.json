@@ -1,0 +1,27 @@
+{
+  "Checkpoints": [
+    "DreamShaper_8_pruned.safetensors",
+    "ltx-video-2b-v0.9.5.safetensors",
+    "sd_xl_base_1.0.safetensors",
+    "toonyou_beta6.safetensors",
+    "v1-5-pruned-emaonly-fp16.safetensors"
+  ],
+  "LoRAs": [
+    "DD-vector-v2.safetensors",
+    "Hyper-SD15-8steps-CFG-lora.safetensors",
+    "Hyper-SDXL-8steps-CFG-lora.safetensors",
+    "v3_sd15_adapter.ckpt"
+  ],
+  "VAEs": [
+    "flux_ae.safetensors",
+    "pixel_space"
+  ],
+  "GGUF_UNets": [
+    "flux1-schnell-Q4_K_S.gguf"
+  ],
+  "GGUF_CLIPs": [
+    "clip_l.safetensors",
+    "t5-v1_1-xxl-encoder-Q4_K_S.gguf",
+    "t5xxl_fp8_e4m3fn.safetensors"
+  ]
+}
