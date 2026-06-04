@@ -74,8 +74,8 @@ Kleine Belege liegen in `results/`, große Renders außerhalb des Repos.
 - **Versuch 2** — Feste Workflow-Bibliothek + erste Produktions-Durchläufe · erledigt
 - **Versuch 3** — Schärfe-Sprung (Lightning + DreamShaper) + ElevenLabs-Vertonung · erledigt
 - **Versuch 4** — Profi-Stack-Foundation: Hyper-SD, ToonYou, DD-Vector, FLUX-GGUF, 7 Custom Nodes · erledigt
-- **Versuch 5** — Kurzgesagt-Wow-Short: 30-Sek-Komposition, 4 Übergangs-Typen, ElevenLabs-Voiceover · in Arbeit
-- **Versuch 6** — SVG-getriebener Kurzgesagt-Workflow (Lineart-ControlNet + ToonYou koloriert SVG-Vorlagen)
+- **Versuch 5** — Premium-Edu-Wow-Short: 30-Sek-Komposition, 4 Übergangs-Typen, ElevenLabs-Voiceover · in Arbeit
+- **Versuch 6** — 3D-Charaktere mit Licht/Schatten: ControlNet-Union + ToonYou + Hires-Fix rendert plastische Hero-Frames, IPAdapter sichert Charakter-Konsistenz
 - **Versuch 7** — Charakter-Konsistenz: Pingu/Linus per IPAdapter + späteres LoRA-Training
 - **Versuch 8** — End-to-End-Fabrik: Lektions-Text → fertiges narriertes Workshop-Video
 
@@ -85,4 +85,9 @@ Stand 2026-06-04. Werkzeuge ausgebaut auf Profi-Stack (FLUX-GGUF, Hyper-SD,
 ControlNet-Union, IPAdapter-Plus, AnimateDiff-Lightning, 6 Motion-LoRAs).
 Versuche 0–4 ausgewertet und gemerged. Versuch 5 als Iterations-Branch offen:
 30-Sek-Wow-Short läuft lokal mit ElevenLabs-Voiceover und 4 unterschiedlichen
-Übergangstypen — wird in der nächsten Session auf Kurzgesagt-Niveau geschärft.
+Übergangstypen — wird in der nächsten Session auf Top-Tier-Edu-Niveau geschärft
+(3D-Figuren, Licht/Schatten, plastische Tiefe).
+
+**Standard-Output:** Alle Versuche sind als HTML-Browser-Demo im Repo zugänglich
+(self-contained, kein Build, kein MP4-Download-Zwang). Pages-Live unter
+http://open-learn.app/content-engine/.

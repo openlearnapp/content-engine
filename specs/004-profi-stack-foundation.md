@@ -38,7 +38,7 @@ Alternative DMD2 wurde geprüft und verworfen: Hyper-SD wird community-weit bevo
 ## Umfang
 
 Installation und Smoke-Test. **Kein Render** — der eigentliche Qualitäts-Vergleich mit
-dem neuen Stack ist Inhalt von Versuch 5 (SVG-getriebener Kurzgesagt-Test).
+dem neuen Stack ist Inhalt von Versuch 5 (SVG-getriebener Premium-Edu-Test).
 
 ## Nicht Teil dieses Versuchs
 
