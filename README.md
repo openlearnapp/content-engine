@@ -33,7 +33,9 @@ hinterlegt, damit die Qualität reproduzierbar bleibt.
 | `01-hintergrund-plate` | Atmosphärische Hintergründe / Backplates | hochauflösendes Standbild |
 | `02-szenen-bild` | Vollständige Szenen-Illustration mit Motiv | hochauflösendes Standbild |
 | `03-text-zu-video` | Text → bewegtes Video | kurzer Video-Clip |
-| `04-bild-zu-video` | Standbild → bewegtes Video *(geplant, LTX-Video)* | Clip aus Standbild |
+| `04-text-zu-video-lightning` | Text → schärferes Video (Lightning-Distillation) | kurzer Video-Clip |
+| `05-svg-zu-illustration` | SVG-Vorlage → kolorierte KI-Illustration *(geplant, ControlNet-Union)* | Standbild |
+| `06-bild-zu-video` | Standbild → bewegter Clip *(geplant, LTX-Video / AnimateDiff-Lightning)* | Clip aus Standbild |
 
 Details und Aufruf: `workflows/README.md`. Die Workflows lassen sich verketten zu
 einer durchgehenden Automatisierung: Text → Bilder → Bewegung → Vertonung → Video.
@@ -43,15 +45,22 @@ einer durchgehenden Automatisierung: Text → Bilder → Bewegung → Vertonung 
 | Bereich | Installiert |
 |---|---|
 | Engine | ComfyUI 0.21.1 |
-| Bild | SDXL Base 1.0, SD 1.5 |
-| Video | AnimateDiff (v3), LTX-Video 2B |
-| Steuerung | ControlNet, ControlNet-Aux, IPAdapter |
-| Pipeline | VideoHelperSuite, Frame-Interpolation |
-| Sprecher | Edge TTS (deutsch, neural) |
+| Bild-Modelle | SDXL Base 1.0, SD 1.5, ToonYou Beta6, DreamShaper 8, FLUX Schnell (GGUF Q4) |
+| Video-Modelle | AnimateDiff v3, AnimateDiff Lightning (4-step), LTX-Video 2B |
+| Speed-LoRAs | Hyper-SDXL 8-step, Hyper-SD15 8-step |
+| Style-LoRAs | DoctorDiffusion Vector-Art-XL |
+| Motion-LoRAs | Pan-Left/Right, Zoom-In/Out, Tilt-Up/Down |
+| Steuerung | ControlNet Tile (SD1.5), ControlNet Union (SDXL, Promax), IPAdapter Plus (SDXL + SD1.5) |
+| Vision-Encoder | CLIP-ViT-H-14 (LAION-2B) |
+| Detail-Pass | Impact-Pack FaceDetailer, SAM-HQ, YOLOv8-Face |
+| Upscale | 4× UltraSharp |
+| Custom-Nodes | rgthree, Inspire-Pack, Impact-Pack (+Subpack), Crystools, GGUF-Loader, efficiency-nodes, ControlNet-Aux, IPAdapter-Plus, AnimateDiff-Evolved, VideoHelperSuite, Frame-Interpolation, Manager |
+| Sprecher | ElevenLabs (Cloud-API, mehrsprachig) · Edge TTS (lokal, Fallback) |
 
-Alle Werkzeuge laufen vollständig lokal — keine Inhalte verlassen den Rechner.
-Grenze: sehr große Video-Modelle (13–14 Mrd. Parameter) brauchen mehr Speicher als
-24 GB RAM bieten.
+Alle Bild-/Video-/Workflow-Werkzeuge laufen vollständig lokal — Inhalte verlassen
+den Rechner nur für ElevenLabs-Voiceover (verschlüsselt zu deren API).
+Grenze: sehr große Video-Modelle (LTX 2.3 22B, FLUX Dev BF16, Wan, HunyuanVideo)
+brauchen mehr Speicher als 24 GB RAM bieten.
 
 ## Methode
 
@@ -64,13 +73,16 @@ Kleine Belege liegen in `results/`, große Renders außerhalb des Repos.
 - **Versuch 1** — Erstes KI-bewegtes Video (AnimateDiff) · erledigt
 - **Versuch 2** — Feste Workflow-Bibliothek + erste Produktions-Durchläufe · erledigt
 - **Versuch 3** — Schärfe-Sprung (Lightning + DreamShaper) + ElevenLabs-Vertonung · erledigt
-- **Versuch 4** — Schärfe weiter pushen (ControlNet Tile + 4×-UltraSharp Upscale)
-- **Versuch 5** — Bild-zu-Video mit LTX-Video
-- **Versuch 6** — Längere Clips (ausgedehntes Context-Window oder Mehrfach-Segmente)
-- **Versuch 7** — End-to-End-Fabrik: Lektions-Text → fertiges narriertes Workshop-Video
+- **Versuch 4** — Profi-Stack-Foundation: Hyper-SD, ToonYou, DD-Vector, FLUX-GGUF, 7 Custom Nodes · erledigt
+- **Versuch 5** — Kurzgesagt-Wow-Short: 30-Sek-Komposition, 4 Übergangs-Typen, ElevenLabs-Voiceover · in Arbeit
+- **Versuch 6** — SVG-getriebener Kurzgesagt-Workflow (Lineart-ControlNet + ToonYou koloriert SVG-Vorlagen)
+- **Versuch 7** — Charakter-Konsistenz: Pingu/Linus per IPAdapter + späteres LoRA-Training
+- **Versuch 8** — End-to-End-Fabrik: Lektions-Text → fertiges narriertes Workshop-Video
 
 ## Status
 
-Stand 2026-05-24. Werkzeuge installiert, Workflow-Bibliothek aufgebaut und
-produktiv getestet, Versuche 0 bis 3 ausgewertet. Erstes vertontes KI-Video steht
-(`results/003-lightning-narrated/final-vertont.mp4`).
+Stand 2026-06-04. Werkzeuge ausgebaut auf Profi-Stack (FLUX-GGUF, Hyper-SD,
+ControlNet-Union, IPAdapter-Plus, AnimateDiff-Lightning, 6 Motion-LoRAs).
+Versuche 0–4 ausgewertet und gemerged. Versuch 5 als Iterations-Branch offen:
+30-Sek-Wow-Short läuft lokal mit ElevenLabs-Voiceover und 4 unterschiedlichen
+Übergangstypen — wird in der nächsten Session auf Kurzgesagt-Niveau geschärft.
