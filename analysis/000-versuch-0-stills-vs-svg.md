@@ -29,7 +29,7 @@ Cinema-Look (Letterbox, Vignette, Korn). Pipeline-Skripte und Doku liegen in
 - Die Pipeline läuft durchgängig: Text → Audio → Bild bzw. SVG → Composite → MP4,
   und sie ist batchfähig (alle 10 Themen am Stück).
 - **SVG-Pfad:** gestochen scharf, exakte Diagramme und Text, kleine Dateien (~2 MB),
-  schnell, vollständig steuerbar. Strukturell nah am Kurzgesagt-Prinzip (Vektor, Code).
+  schnell, vollständig steuerbar. Strukturell nah am Premium-Edu-Prinzip (Vektor, Code).
 - **ComfyUI-Pfad:** atmosphärische Tiefe und Stimmung, die der SVG-Pfad nicht liefert.
   Gut für Storytelling-Tableaus und „Wow"-Momente.
 - Der KI-Sprecher (Edge TTS Killian) klingt menschlich und ist kostenlos.

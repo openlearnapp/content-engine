@@ -92,7 +92,7 @@ Das ist die Voraussetzung für den eigentlichen Qualitäts-Sprung in den nächst
 ## Offene Punkte
 
 - **SDXL-spezifische ControlNet-Modelle** (Depth, Lineart, Canny SDXL-Versionen) — für
-  den SVG-getriebenen Kurzgesagt-Test (Versuch 5) zusätzlich nötig.
+  den SVG-getriebenen Premium-Edu-Test (Versuch 5) zusätzlich nötig.
 - **Erster Profi-Workflow** mit den neuen Bausteinen ist Inhalt von Versuch 5 — der
   eigentliche Stärken-Beweis kommt dort.
 - **kohya_ss** für LoRA-Training des Maskottchens — eigener Versuch wenn benötigt.
