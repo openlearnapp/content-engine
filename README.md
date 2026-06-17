@@ -89,6 +89,16 @@ nicht** (ComfyUI/PyTorch-MPS-Bug, erschöpfend nachgewiesen, auch nach ComfyUI-U
 Konsistente 3D-Figuren über SVG→Lineart-ControlNet→SDXL. Wan/14B/mehrminütige Videos
 bleiben der Cloud vorbehalten (RunPod/Vast stundenweise + Speicher; Colab Pro als Einstieg).
 
-**Output:** Belege liegen als echte Dateien im Repo (MP4 als „view raw" herunterladbar);
-zusätzlich Browser-Übersicht `index.html`. Pages-Live unter
-http://open-learn.app/content-engine/.
+**Output:** Jeder Versuch mit Video legt das Ergebnis als **echtes MP4 im Repo** ab —
+direkt herunterladbar über „view raw" (siehe Liste unten), kein HTML-Umweg.
+
+## Videos — direkt herunterladbar (view raw)
+
+| Versuch | Video | Download |
+|---|---|---|
+| 1 — AnimateDiff | erstes echtes KI-Video | [animatediff-v3-funktioniert.mp4](https://github.com/openlearnapp/content-engine/blob/main/results/001-animatediff/animatediff-v3-funktioniert.mp4) |
+| 2 — Workflow-Bibliothek | Text-zu-Video Terminal | [text-zu-video-terminal.mp4](https://github.com/openlearnapp/content-engine/blob/main/results/002-workflow-bibliothek/text-zu-video-terminal.mp4) |
+| 3 — Lightning + Vertonung | vertonter Clip | [final-vertont.mp4](https://github.com/openlearnapp/content-engine/blob/main/results/003-lightning-narrated/final-vertont.mp4) |
+| 7 — Hybrid-Wow | „Du bist das Universum" (29,5 s, vertont) | [wow-du-bist-das-universum.mp4](https://github.com/openlearnapp/content-engine/blob/main/results/007-hybrid-wow-ltx/wow-du-bist-das-universum.mp4) |
+
+(Versuch 0 und 4 sind Auswertung bzw. Werkzeug-Setup — ohne eigenes Video.)
