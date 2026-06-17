@@ -55,7 +55,7 @@
     <div class="meta">SD 1.5 allein, ein Standbild — beweist: Basis-Modell + MPS funktionieren</div>
   </div>
 </div>
-<a class="doc-link" href="https://github.com/openlearnapp/content-engine/blob/versuch-3-lightning-narrated/analysis/001-versuch-1-animatediff.md">→ Auswertung lesen</a>
+<a class="doc-link" href="https://github.com/openlearnapp/content-engine/blob/main/analysis/001-versuch-1-animatediff.md">→ Auswertung lesen</a>
 </div>
 
 <h2><span class="num">Versuch 2</span>Workflow-Bibliothek + Produktions-Durchlauf</h2>
@@ -80,7 +80,7 @@
     <div class="meta">funktioniert technisch, bleibt aber atmosphärisch-abstrakt</div>
   </div>
 </div>
-<a class="doc-link" href="https://github.com/openlearnapp/content-engine/blob/versuch-3-lightning-narrated/analysis/002-versuch-2-workflow-bibliothek.md">→ Auswertung lesen</a>
+<a class="doc-link" href="https://github.com/openlearnapp/content-engine/blob/main/analysis/002-versuch-2-workflow-bibliothek.md">→ Auswertung lesen</a>
 </div>
 
 <h2><span class="num">Versuch 3</span>Schärfe-Sprung + Vertonung (Lightning + ElevenLabs)</h2>
@@ -108,16 +108,50 @@
     <div class="meta">ElevenLabs OPA · „Willkommen in der Linux-Werkstatt. Heute geht's los."</div>
   </div>
 </div>
-<a class="doc-link" href="https://github.com/openlearnapp/content-engine/blob/versuch-3-lightning-narrated/analysis/003-lightning-narrated.md">→ Auswertung lesen</a>
+<a class="doc-link" href="https://github.com/openlearnapp/content-engine/blob/main/analysis/003-lightning-narrated.md">→ Auswertung lesen</a>
+</div>
+
+<h2><span class="num">Versuch 4</span>Profi-Stack-Foundation</h2>
+<div class="versuch">
+<p>Werkzeug-Ausbau: 7 Custom-Node-Pakete und 10 Modelle (Hyper-SD, ToonYou, DD-Vector, FLUX-Schnell-GGUF, ControlNet-Union, IPAdapter-Plus) installiert und per API verifiziert. Kein Video — reine Grundlage für die folgenden Versuche.</p>
+<a class="doc-link" href="https://github.com/openlearnapp/content-engine/blob/main/analysis/004-profi-stack-foundation.md">→ Auswertung lesen</a>
+</div>
+
+<h2><span class="num">Versuch 7</span>Hybrid-Wow-Video — „Du bist das Universum"</h2>
+<div class="versuch">
+<p>Ziel war Wan 2.2 als Engine — auf diesem Mac (MPS) erzeugt es aber erschöpfend nachgewiesen nur Rauschen (ComfyUI/PyTorch-MPS-Bug, nicht lokal lauffähig). Gelöst mit dem funktionierenden Stack: <strong>LTX-Video 2B</strong> für kinoreife bewegte Hintergründe + <strong>SVG→ControlNet→SDXL</strong> für eine konsistente 3D-Figur + ElevenLabs-Voiceover. 5 Szenen, vollständig lokal.</p>
+<div class="grid">
+  <div class="card wide">
+    <h3>Endprodukt — vertontes Wow-Video</h3>
+    <video src="results/007-hybrid-wow-ltx/wow-du-bist-das-universum.mp4" controls preload="metadata"></video>
+    <div class="meta">1280×720 · 29,5 s · LTX-Video 2B + SVG-ControlNet-3D-Figur + ElevenLabs OPA · 5 Szenen</div>
+  </div>
+  <div class="card">
+    <h3>Szene: Sternengeburt (LTX-Video 2B)</h3>
+    <img src="results/007-hybrid-wow-ltx/szene-sternengeburt.png" alt="">
+    <div class="meta">Text-zu-Video, kinoreif, lokal auf MPS</div>
+  </div>
+  <div class="card">
+    <h3>3D-Figur aus flacher SVG</h3>
+    <img src="results/007-hybrid-wow-ltx/figur-pingu-3d.png" alt="">
+    <div class="meta">SVG-Vorlage → Lineart-ControlNet → SDXL: Tiefe, Licht, Schatten — Form konsistent</div>
+  </div>
+  <div class="card">
+    <h3>Vorlage (flache SVG)</h3>
+    <img src="results/007-hybrid-wow-ltx/figur-svg-vorlage.png" alt="">
+    <div class="meta">ControlNet-Input aus der Cinematic-Bibliothek</div>
+  </div>
+</div>
+<a class="doc-link" href="https://github.com/openlearnapp/content-engine/blob/main/analysis/007-hybrid-wow-ltx.md">→ Auswertung lesen</a>
 </div>
 
 <footer>
 Repository: <a href="https://github.com/openlearnapp/content-engine">openlearnapp/content-engine</a><br>
-Doku: <a href="https://github.com/openlearnapp/content-engine/blob/versuch-3-lightning-narrated/README.md">README</a> ·
-<a href="https://github.com/openlearnapp/content-engine/tree/versuch-3-lightning-narrated/workflows">workflows/</a> ·
-<a href="https://github.com/openlearnapp/content-engine/tree/versuch-3-lightning-narrated/specs">specs/</a> ·
-<a href="https://github.com/openlearnapp/content-engine/tree/versuch-3-lightning-narrated/plans">plans/</a> ·
-<a href="https://github.com/openlearnapp/content-engine/tree/versuch-3-lightning-narrated/analysis">analysis/</a>
+Doku: <a href="https://github.com/openlearnapp/content-engine/blob/main/README.md">README</a> ·
+<a href="https://github.com/openlearnapp/content-engine/tree/main/workflows">workflows/</a> ·
+<a href="https://github.com/openlearnapp/content-engine/tree/main/specs">specs/</a> ·
+<a href="https://github.com/openlearnapp/content-engine/tree/main/plans">plans/</a> ·
+<a href="https://github.com/openlearnapp/content-engine/tree/main/analysis">analysis/</a>
 </footer>
 
 </div>
