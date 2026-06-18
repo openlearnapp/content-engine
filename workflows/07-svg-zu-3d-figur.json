@@ -1,0 +1,17 @@
+{
+  "_zweck": "SVG-Vektorfigur -> kolorierte 3D-Figur mit Licht/Schatten. Lineart-ControlNet (SDXL Union) gibt die Form vor, SDXL fuellt Tiefe/Volumen. Charakter bleibt konsistent.",
+  "_prompt_setzen": "Node 2, inputs.text. SVG vorher mit rsvg-convert zu PNG rastern und nach ControlMagic ComfyUI/input/ legen, in Node 14 referenzieren.",
+  "_wichtig": "SetUnionControlNetType (Node 17) auf 'canny/lineart/anime_lineart/mlsd'. strength ~0.75, end_percent ~0.85 -- haelt die Form, laesst SDXL Schattierung erfinden.",
+  "1": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": "sd_xl_base_1.0.safetensors"}},
+  "2": {"class_type": "CLIPTextEncode", "inputs": {"text": "adorable character, soft three-dimensional shading, rim light, gentle drop shadow, volumetric depth, glossy polished 3D render, kurzgesagt style, studio lighting", "clip": ["1", 1]}},
+  "3": {"class_type": "CLIPTextEncode", "inputs": {"text": "flat, sketch, lineart, outline only, photo, noise, blurry, text, watermark, ugly", "clip": ["1", 1]}},
+  "14": {"class_type": "LoadImage", "inputs": {"image": "svg-figur.png"}},
+  "15": {"class_type": "LineArtPreprocessor", "inputs": {"image": ["14", 0], "coarse": "disable", "resolution": 1024}},
+  "16": {"class_type": "ControlNetLoader", "inputs": {"control_net_name": "controlnet-union-sdxl-promax.safetensors"}},
+  "17": {"class_type": "SetUnionControlNetType", "inputs": {"control_net": ["16", 0], "type": "canny/lineart/anime_lineart/mlsd"}},
+  "18": {"class_type": "ControlNetApplyAdvanced", "inputs": {"positive": ["2", 0], "negative": ["3", 0], "control_net": ["17", 0], "image": ["15", 0], "strength": 0.75, "start_percent": 0.0, "end_percent": 0.85, "vae": ["1", 2]}},
+  "4": {"class_type": "EmptyLatentImage", "inputs": {"width": 1024, "height": 1024, "batch_size": 1}},
+  "5": {"class_type": "KSampler", "inputs": {"model": ["1", 0], "seed": 7, "steps": 26, "cfg": 7.0, "sampler_name": "dpmpp_2m", "scheduler": "karras", "positive": ["18", 0], "negative": ["18", 1], "latent_image": ["4", 0], "denoise": 1.0}},
+  "6": {"class_type": "VAEDecode", "inputs": {"samples": ["5", 0], "vae": ["1", 2]}},
+  "7": {"class_type": "SaveImage", "inputs": {"images": ["6", 0], "filename_prefix": "svg-3d/figur"}}
+}

@@ -74,20 +74,31 @@ Kleine Belege liegen in `results/`, große Renders außerhalb des Repos.
 - **Versuch 2** — Feste Workflow-Bibliothek + erste Produktions-Durchläufe · erledigt
 - **Versuch 3** — Schärfe-Sprung (Lightning + DreamShaper) + ElevenLabs-Vertonung · erledigt
 - **Versuch 4** — Profi-Stack-Foundation: Hyper-SD, ToonYou, DD-Vector, FLUX-GGUF, 7 Custom Nodes · erledigt
-- **Versuch 5** — Premium-Edu-Wow-Short: 30-Sek-Komposition, 4 Übergangs-Typen, ElevenLabs-Voiceover · in Arbeit
-- **Versuch 6** — 3D-Charaktere mit Licht/Schatten: ControlNet-Union + ToonYou + Hires-Fix rendert plastische Hero-Frames, IPAdapter sichert Charakter-Konsistenz
-- **Versuch 7** — Charakter-Konsistenz: Pingu/Linus per IPAdapter + späteres LoRA-Training
-- **Versuch 8** — End-to-End-Fabrik: Lektions-Text → fertiges narriertes Workshop-Video
+- **Versuch 5** — Premium-Edu-Wow-Short: 30-Sek-Komposition, 4 Übergangs-Typen, ElevenLabs-Voiceover · Iterations-Branch
+- **Versuch 6** — 3D-Charaktere mit Licht/Schatten: ControlNet-Union + ToonYou + Hires-Fix · Iterations-Branch
+- **Versuch 7** — Hybrid-Wow-Video „Du bist das Universum": LTX-Video 2B (Hintergründe) + SVG→ControlNet (3D-Figur) + ElevenLabs · erledigt. Befund: Wan 2.2 5B lokal auf MPS nicht lauffähig (Plattform-Bug) — LTX-Video 2B ist die lokale Video-Engine.
+- **Versuch 8** — Charakter-Konsistenz: Pingu/Linus per IPAdapter + späteres LoRA-Training
+- **Versuch 9** — End-to-End-Fabrik: Lektions-Text → fertiges narriertes Workshop-Video
 
 ## Status
 
-Stand 2026-06-04. Werkzeuge ausgebaut auf Profi-Stack (FLUX-GGUF, Hyper-SD,
-ControlNet-Union, IPAdapter-Plus, AnimateDiff-Lightning, 6 Motion-LoRAs).
-Versuche 0–4 ausgewertet und gemerged. Versuch 5 als Iterations-Branch offen:
-30-Sek-Wow-Short läuft lokal mit ElevenLabs-Voiceover und 4 unterschiedlichen
-Übergangstypen — wird in der nächsten Session auf Top-Tier-Edu-Niveau geschärft
-(3D-Figuren, Licht/Schatten, plastische Tiefe).
+Stand 2026-06-17. Versuche 0–4 gemerged, Versuch 7 fertig (erstes vertontes
+Hybrid-Wow-MP4). Zentraler Befund: **Wan 2.2 5B läuft lokal auf Apple-Silicon/MPS
+nicht** (ComfyUI/PyTorch-MPS-Bug, erschöpfend nachgewiesen, auch nach ComfyUI-Update).
+**Lokale Video-Engine ist daher LTX-Video 2B** (kinoreife Clips, Text- und Bild-zu-Video).
+Konsistente 3D-Figuren über SVG→Lineart-ControlNet→SDXL. Wan/14B/mehrminütige Videos
+bleiben der Cloud vorbehalten (RunPod/Vast stundenweise + Speicher; Colab Pro als Einstieg).
 
-**Standard-Output:** Alle Versuche sind als HTML-Browser-Demo im Repo zugänglich
-(self-contained, kein Build, kein MP4-Download-Zwang). Pages-Live unter
-http://open-learn.app/content-engine/.
+**Output:** Jeder Versuch mit Video legt das Ergebnis als **echtes MP4 im Repo** ab —
+direkt herunterladbar über „view raw" (siehe Liste unten), kein HTML-Umweg.
+
+## Videos — direkt herunterladbar (view raw)
+
+| Versuch | Video | Download |
+|---|---|---|
+| 1 — AnimateDiff | erstes echtes KI-Video | [animatediff-v3-funktioniert.mp4](https://github.com/openlearnapp/content-engine/blob/main/results/001-animatediff/animatediff-v3-funktioniert.mp4) |
+| 2 — Workflow-Bibliothek | Text-zu-Video Terminal | [text-zu-video-terminal.mp4](https://github.com/openlearnapp/content-engine/blob/main/results/002-workflow-bibliothek/text-zu-video-terminal.mp4) |
+| 3 — Lightning + Vertonung | vertonter Clip | [final-vertont.mp4](https://github.com/openlearnapp/content-engine/blob/main/results/003-lightning-narrated/final-vertont.mp4) |
+| 7 — Hybrid-Wow | „Du bist das Universum" (29,5 s, vertont) | [wow-du-bist-das-universum.mp4](https://github.com/openlearnapp/content-engine/blob/main/results/007-hybrid-wow-ltx/wow-du-bist-das-universum.mp4) |
+
+(Versuch 0 und 4 sind Auswertung bzw. Werkzeug-Setup — ohne eigenes Video.)

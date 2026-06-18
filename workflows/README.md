@@ -13,7 +13,13 @@ damit die Qualität reproduzierbar bleibt.
 | `02-szenen-bild.json` | Vollständige Szenen-Illustration mit Motiv | SDXL | Standbild 1344×768 |
 | `03-text-zu-video.json` | Text → bewegtes Video (Baseline) | SD 1.5 + AnimateDiff v3 | Clip, 16 Frames |
 | `04-text-zu-video-lightning.json` | Text → bewegtes Video (schärfer, 32 Frames) | DreamShaper 8 + AnimateDiff Lightning | Clip, 32 Frames @ 8 fps |
-| `05-bild-zu-video.json` | Standbild → Video *(geplant)* | LTX-Video 2B | Clip aus Standbild |
+| `05-bild-zu-video.json` | Standbild → bewegter Clip | LTX-Video 2B (i2v) | Clip aus Standbild |
+| `06-text-zu-video-ltx.json` | Text → kinoreifer Clip | LTX-Video 2B (t2v) | Clip 704×480 |
+| `07-svg-zu-3d-figur.json` | SVG-Figur → 3D-Figur mit Licht/Schatten | SDXL + Lineart-ControlNet (Union) | Standbild 1024² |
+
+> **Wan 2.2 5B läuft lokal auf MPS nicht** (siehe `analysis/007`). Für bewegtes Video ist
+> **LTX-Video 2B** die lokale Engine. LTX braucht einen separaten T5-Encoder
+> (`CLIPLoader`, type `ltxv`) — der Checkpoint enthält keinen.
 
 ## Format
 
