@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"/>
+<title>Wie Strom durch Linux fließt — 30-Sek-Short</title>
+<style>
+  :root {
+    --bg: #04060A;
+    --cyan: #5AC8FF;
+    --magenta: #A040FF;
+    --warm: #FFB84A;
+    --green: #5AFF98;
+    --text: #E8EEF8;
+    --muted: #A0B0C0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%; height: 100%;
+    background: #000;
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    overflow: hidden;
+  }
+  .stage {
+    position: relative;
+    width: 100vw; height: 100vh;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  /* CINEMA-LOOK */
+  .letterbox-top, .letterbox-bot {
+    position: absolute; left: 0; right: 0; height: 56px;
+    background: #000; z-index: 200; pointer-events: none;
+  }
+  .letterbox-top { top: 0; }
+  .letterbox-bot { bottom: 0; }
+  .vignette {
+    position: absolute; inset: 0; z-index: 180; pointer-events: none;
+    box-shadow: inset 0 0 360px 100px rgba(0,0,0,0.92);
+  }
+  .grain {
+    position: absolute; inset: 0; z-index: 190; pointer-events: none;
+    opacity: 0.07; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1   0 0 0 0 1   0 0 0 0 1   0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+    animation: grainShift 0.4s steps(4) infinite;
+  }
+  @keyframes grainShift {
+    0% { transform: translate(0,0); } 25% { transform: translate(-3px,2px); }
+    50% { transform: translate(2px,-2px); } 75% { transform: translate(-1px,3px); }
+  }
+  .flare {
+    position: absolute; left: -10%; right: -10%; top: 25%; height: 280px;
+    z-index: 170; pointer-events: none; opacity: 0.35;
+    background: radial-gradient(ellipse, rgba(90,200,255,0.55), transparent 70%);
+    filter: blur(40px);
+    animation: flareBreath 8s ease-in-out infinite;
+  }
+  @keyframes flareBreath {
+    0%, 100% { opacity: 0.3; transform: translateY(0); }
+    50%      { opacity: 0.55; transform: translateY(-8px); }
+  }
+
+  /* PARTICLES */
+  .particles {
+    position: absolute; inset: 0; z-index: 5; pointer-events: none;
+    overflow: hidden;
+  }
+  .particle {
+    position: absolute; width: 3px; height: 3px;
+    border-radius: 50%; background: var(--cyan);
+    box-shadow: 0 0 8px var(--cyan);
+    animation: floatUp linear infinite;
+    opacity: 0;
+  }
+  @keyframes floatUp {
+    0%   { transform: translateY(110vh) translateX(0); opacity: 0; }
+    10%  { opacity: 0.9; }
+    90%  { opacity: 0.9; }
+    100% { transform: translateY(-10vh) translateX(40px); opacity: 0; }
+  }
+
+  /* SZENE */
+  .scene {
+    position: absolute; inset: 0;
+    opacity: 0; transform: scale(1.04);
+    transition: opacity 0.6s cubic-bezier(0.45, 0, 0.55, 1),
+                transform 0.8s cubic-bezier(0.45, 0, 0.55, 1);
+    pointer-events: none;
+  }
+  .scene.active {
+    opacity: 1; transform: scale(1.0);
+    pointer-events: auto;
+  }
+  .scene.active .camera {
+    animation: dollyIn var(--scene-dur, 6s) cubic-bezier(0.45, 0, 0.55, 1) forwards;
+  }
+  @keyframes dollyIn {
+    0%   { transform: scale(1.0) translate(0, 0); }
+    100% { transform: scale(1.10) translate(0, -1.5%); }
+  }
+  .camera { position: absolute; inset: 0; transform-origin: 50% 50%; }
+  .layer { position: absolute; pointer-events: none; }
+  .layer img, .layer object {
+    width: 100%; height: 100%; object-fit: contain;
+    display: block;
+  }
+  .layer.bg img, .layer.bg object { object-fit: cover; }
+
+  /* DEPTH-LAYER PARALLAX */
+  .depth-far  { animation: driftSlow 16s ease-in-out infinite alternate; z-index: 10; }
+  .depth-mid  { animation: driftMid  10s ease-in-out infinite alternate; z-index: 30; }
+  .depth-near { animation: driftFast  7s ease-in-out infinite alternate; z-index: 60; }
+  @keyframes driftSlow { 0% { transform: translate(-1%, 0); } 100% { transform: translate(1%, -0.5%); } }
+  @keyframes driftMid  { 0% { transform: translate(-1.5%, 0); } 100% { transform: translate(1.5%, -1%); } }
+  @keyframes driftFast { 0% { transform: translate(-2%, 0); } 100% { transform: translate(2%, -1.5%); } }
+
+  /* SUBTITLE */
+  .subtitle {
+    position: absolute; left: 50%; bottom: 110px;
+    transform: translateX(-50%);
+    max-width: 920px; padding: 16px 28px;
+    background: rgba(10, 14, 28, 0.78);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(90, 200, 255, 0.22);
+    border-radius: 14px;
+    color: var(--text);
+    font-size: 23px; font-weight: 500; line-height: 1.45;
+    text-align: center;
+    z-index: 220;
+    opacity: 0;
+    transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+    text-shadow: 0 2px 12px rgba(0,0,0,0.8);
+  }
+  .subtitle.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
+  .subtitle .tag {
+    display: block;
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--cyan);
+    letter-spacing: 1.6px;
+    margin-bottom: 6px;
+    opacity: 0.85;
+    text-transform: uppercase;
+  }
+  .subtitle em {
+    font-style: normal;
+    color: var(--cyan);
+    text-shadow: 0 0 18px rgba(90,200,255,0.7);
+  }
+
+  /* HUD */
+  .hud-top {
+    position: absolute; left: 24px; top: 72px; z-index: 230;
+    font-family: ui-monospace, monospace; font-size: 11px;
+    color: var(--cyan); letter-spacing: 1.4px; opacity: 0.75;
+  }
+  .hud-right {
+    position: absolute; right: 24px; top: 72px; z-index: 230;
+    font-family: ui-monospace, monospace; font-size: 11px;
+    color: var(--muted); letter-spacing: 1.2px; opacity: 0.75;
+  }
+  .progress {
+    position: absolute; left: 24px; right: 24px; bottom: 72px;
+    height: 2px; background: rgba(255,255,255,0.08);
+    z-index: 230;
+  }
+  .progress-fill {
+    height: 100%; width: 0;
+    background: linear-gradient(90deg, var(--cyan), var(--magenta));
+    box-shadow: 0 0 12px var(--cyan);
+    transition: width 0.1s linear;
+  }
+
+  /* CONTROLS */
+  .controls {
+    position: absolute; left: 50%; bottom: 18px;
+    transform: translateX(-50%);
+    z-index: 250;
+    display: flex; gap: 8px; align-items: center;
+    background: rgba(10, 14, 28, 0.86);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(90, 200, 255, 0.22);
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-family: ui-monospace, monospace;
+    font-size: 12px;
+  }
+  .controls button {
+    background: transparent; border: none; color: var(--text);
+    padding: 8px 16px; cursor: pointer; border-radius: 999px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 600;
+    letter-spacing: 0.6px;
+    transition: all 0.2s;
+  }
+  .controls button:hover { background: rgba(90, 200, 255, 0.16); }
+  .controls button.primary { background: var(--cyan); color: #06080F; }
+  .controls button.primary:hover { background: #7ED4FF; }
+  .controls .time { color: var(--muted); padding: 0 8px; font-variant-numeric: tabular-nums; }
+
+  /* === SZENEN-LAYOUTS === */
+
+  /* S01 HOOK — Mensch tippt, Frage erscheint */
+  .s01-bg     { inset: 0; opacity: 0.4; }
+  .s01-stars  { inset: 0; z-index: 5; opacity: 0.6; }
+  .s01-person { left: 50%; top: 28%; width: 22%; transform: translateX(-50%); z-index: 60; }
+  .s01-pulse  { left: 50%; top: 56%; width: 16%; transform: translateX(-50%); z-index: 65; opacity: 0.85; }
+  .s01-glow {
+    position: absolute; left: 30%; right: 30%; top: 38%; bottom: 22%;
+    background: radial-gradient(ellipse, rgba(90,200,255,0.4), transparent 65%);
+    z-index: 50; pointer-events: none; filter: blur(20px);
+    animation: pulse-glow 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.5; transform: scale(1.0); }
+    50%      { opacity: 0.95; transform: scale(1.08); }
+  }
+  .s01-cluster-l { left: 6%; top: 18%; width: 16%; z-index: 25; opacity: 0.4; }
+  .s01-cluster-r { right: 6%; top: 22%; width: 14%; z-index: 25; opacity: 0.3; }
+
+  /* S02 STROM — Stromquelle + Elektronen + Motherboard */
+  .s02-bg       { inset: 0; opacity: 0.35; }
+  .s02-source   { left: 6%;  top: 22%; width: 24%; z-index: 60; }
+  .s02-stream   { left: 28%; top: 36%; width: 44%; z-index: 65; }
+  .s02-board    { right: 4%; top: 24%; width: 30%; z-index: 60; }
+  .s02-pulse1   { left: 36%; top: 50%; width: 6%; z-index: 70; }
+  .s02-pulse2   { left: 54%; top: 42%; width: 6%; z-index: 70; }
+  .s02-arrow    { left: 32%; top: 52%; width: 38%; z-index: 80; opacity: 0.85; }
+
+  /* S03 CPU+RAM — drei Hardware-Hero-Shots */
+  .s03-bg     { inset: 0; opacity: 0.3; }
+  .s03-cpu    { left: 4%;  top: 22%; width: 30%; z-index: 60; }
+  .s03-chip   { left: 36%; top: 18%; width: 28%; z-index: 70; }
+  .s03-ram    { right: 4%; top: 22%; width: 30%; z-index: 60; }
+  .s03-label1 { left: 14%;  top: 64%; }
+  .s03-label2 { left: 46%;  top: 64%; }
+  .s03-label3 { right: 14%; top: 64%; }
+
+  /* S04 KERNEL — Daten-Strahl + Code-Stream + Terminal */
+  .s04-bg       { inset: 0; opacity: 0.45; }
+  .s04-portal   { left: 50%; top: 16%; width: 36%; transform: translateX(-50%); z-index: 50; opacity: 0.7; }
+  .s04-strahl   { left: 50%; top: 28%; width: 60%; transform: translateX(-50%); z-index: 65; }
+  .s04-code     { left: 4%;  bottom: 16%; width: 36%; z-index: 70; }
+  .s04-terminal { right: 4%; bottom: 16%; width: 36%; z-index: 70; }
+  .s04-ribbons  { inset: 0; z-index: 40; opacity: 0.6; }
+
+  /* S05 FINALE — Pingu winkt, Logo */
+  .s05-bg     { inset: 0; opacity: 0.5; }
+  .s05-pingu  { left: 50%; top: 22%; width: 28%; transform: translateX(-50%); z-index: 70; }
+  .s05-aura {
+    position: absolute; left: 28%; right: 28%; top: 28%; bottom: 28%;
+    background: radial-gradient(circle, rgba(90,255,152,0.45), transparent 60%);
+    z-index: 55; pointer-events: none; filter: blur(30px);
+    animation: aura-pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes aura-pulse {
+    0%, 100% { opacity: 0.55; transform: scale(1.0); }
+    50%      { opacity: 0.9;  transform: scale(1.12); }
+  }
+  .s05-tagline {
+    position: absolute; left: 50%; bottom: 22%;
+    transform: translateX(-50%);
+    font-size: 38px; font-weight: 700; letter-spacing: -0.5px;
+    color: var(--text);
+    text-shadow: 0 0 24px rgba(90,255,152,0.4);
+    z-index: 90; opacity: 0;
+    animation: fade-up 1.2s 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+  @keyframes fade-up {
+    0%   { opacity: 0; transform: translateX(-50%) translateY(20px); }
+    100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+  .s05-brand {
+    position: absolute; left: 50%; bottom: 14%;
+    transform: translateX(-50%);
+    font-family: ui-monospace, monospace; font-size: 12px;
+    color: var(--cyan); letter-spacing: 3px; text-transform: uppercase;
+    opacity: 0;
+    animation: fade-up 1.0s 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+
+  /* === ÜBERGANG: CAMERA-PAN-DOWN === */
+  .scene.exit-pan-down {
+    animation: panDown 0.85s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+  }
+  .scene.enter-pan-down {
+    animation: panDownEnter 0.85s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+  }
+  @keyframes panDown {
+    0%   { opacity: 1; transform: translateY(0) scale(1.0); }
+    100% { opacity: 0; transform: translateY(-110%) scale(0.94); }
+  }
+  @keyframes panDownEnter {
+    0%   { opacity: 0; transform: translateY(100%) scale(0.94); }
+    100% { opacity: 1; transform: translateY(0) scale(1.0); }
+  }
+
+  /* === ÜBERGANG: WOLKEN-WIPE === */
+  .cloud-wipe {
+    position: absolute; left: -10%; right: -10%; bottom: -120%;
+    height: 220%;
+    z-index: 160; pointer-events: none;
+    opacity: 0;
+  }
+  .cloud-wipe img {
+    width: 100%; height: 100%; object-fit: cover;
+    filter: drop-shadow(0 -30px 40px rgba(255,255,255,0.3));
+  }
+  .cloud-wipe.active {
+    animation: cloudSweep 1.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+  @keyframes cloudSweep {
+    0%   { opacity: 0; transform: translateY(0); }
+    25%  { opacity: 1; }
+    50%  { opacity: 1; transform: translateY(-110%); }
+    75%  { opacity: 1; transform: translateY(-180%); }
+    100% { opacity: 0; transform: translateY(-220%); }
+  }
+
+  /* === ÜBERGANG: LINE-WIPE === */
+  .line-wipe {
+    position: absolute; top: 0; bottom: 0; left: -10%;
+    width: 8px; z-index: 165; pointer-events: none;
+    opacity: 0;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(90,200,255,0.0) 30%,
+      rgba(90,200,255,1.0) 50%,
+      rgba(160,64,255,1.0) 50.1%,
+      rgba(160,64,255,0.0) 70%,
+      transparent 100%);
+    box-shadow:
+      0 0 30px var(--cyan),
+      0 0 60px var(--cyan),
+      -2px 0 80px var(--magenta);
+  }
+  .line-wipe.active {
+    animation: lineSweep 1.1s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  }
+  @keyframes lineSweep {
+    0%   { opacity: 0; left: -10%; }
+    15%  { opacity: 1; }
+    85%  { opacity: 1; }
+    100% { opacity: 0; left: 110%; }
+  }
+  .scene.exit-line-left {
+    animation: clipFromRight 1.1s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  }
+  @keyframes clipFromRight {
+    0%   { clip-path: inset(0 0% 0 0); }
+    100% { clip-path: inset(0 100% 0 0); }
+  }
+  .scene.enter-line-right {
+    clip-path: inset(0 0 0 100%);
+    opacity: 1; transform: scale(1.0);
+    animation: clipFromLeft 1.1s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  }
+  @keyframes clipFromLeft {
+    0%   { clip-path: inset(0 0 0 100%); }
+    100% { clip-path: inset(0 0 0 0); }
+  }
+
+  /* === ÜBERGANG: IRIS-IN === */
+  .scene.exit-iris {
+    animation: irisOut 1.0s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+  }
+  @keyframes irisOut {
+    0%   { clip-path: circle(150% at 50% 50%); opacity: 1; }
+    100% { clip-path: circle(0% at 50% 50%); opacity: 1; }
+  }
+  .scene.enter-iris {
+    animation: irisIn 1.0s 0.1s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+    clip-path: circle(0% at 50% 60%);
+    opacity: 1; transform: scale(1.0);
+  }
+  @keyframes irisIn {
+    0%   { clip-path: circle(0% at 50% 60%); }
+    100% { clip-path: circle(150% at 50% 60%); }
+  }
+
+  /* TITLE-CARD before play */
+  .title-card {
+    position: absolute; inset: 0; z-index: 300;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: radial-gradient(ellipse at center, #0A1428 0%, #04060A 70%);
+    transition: opacity 0.6s ease;
+  }
+  .title-card.gone { opacity: 0; pointer-events: none; }
+  .title-card h1 {
+    font-size: 64px; font-weight: 700;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, var(--cyan), var(--magenta));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .title-card p {
+    color: var(--muted); font-size: 16px;
+    letter-spacing: 1.6px; text-transform: uppercase;
+    margin-bottom: 48px;
+  }
+  .play-button {
+    padding: 18px 48px;
+    background: var(--cyan); color: #06080F;
+    border: none; border-radius: 999px;
+    font-family: ui-monospace, monospace;
+    font-size: 14px; font-weight: 700; letter-spacing: 2px;
+    cursor: pointer;
+    box-shadow: 0 0 40px rgba(90,200,255,0.4);
+    transition: all 0.3s;
+  }
+  .play-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 60px rgba(90,200,255,0.7);
+  }
+
+  /* Numeric counter for "Milliarden" */
+  .big-number {
+    position: absolute; left: 50%; top: 70%;
+    transform: translateX(-50%);
+    font-family: ui-monospace, monospace;
+    font-size: 56px; font-weight: 700;
+    color: var(--warm);
+    text-shadow: 0 0 28px rgba(255,184,74,0.6);
+    z-index: 95; opacity: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .scene.active .big-number {
+    animation: numberPop 0.6s 1.0s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+  @keyframes numberPop {
+    0%   { opacity: 0; transform: translateX(-50%) scale(0.7); }
+    100% { opacity: 1; transform: translateX(-50%) scale(1.0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+
+  <!-- CINEMA WRAPPER -->
+  <div class="letterbox-top"></div>
+  <div class="letterbox-bot"></div>
+  <div class="vignette"></div>
+  <div class="grain"></div>
+  <div class="flare"></div>
+
+  <!-- AMBIENT PARTICLES -->
+  <div class="particles" id="particles"></div>
+
+  <!-- ============== SCENE 01: HOOK ============== -->
+  <div class="scene" data-scene="1" style="--scene-dur: 5s">
+    <div class="camera">
+      <div class="layer bg s01-bg depth-far">
+        <img src="../../../lernvideo-asset-system/asset-bibliothek/cinematic/szenen-bg/innen-computer-bg.svg" alt="" onerror="this.style.display='none'"/>
+      </div>
+      <div class="layer s01-cluster-l depth-far">
+        <img src="../../../lernvideo-asset-system/asset-bibliothek/cinematic/wolken/wolke-cluster-3lump.svg" alt=""/>
+      </div>
+      <div class="layer s01-cluster-r depth-far">
+        <img src="../../../lernvideo-asset-system/asset-bibliothek/cinematic/wolken/wolke-blob-magenta.svg" alt=""/>
+      </div>
+      <div class="s01-glow"></div>
+      <div class="layer s01-person depth-mid">
+        <img src="../../../lernvideo-asset-system/asset-bibliothek/cinematic/menschen/mensch-tippend.svg" alt=""/>
+      </div>
+      <div class="layer s01-pulse depth-near">
+        <img src="../../../lernvideo-asset-system/asset-bibliothek/cinematic/flow/pulse-electric.svg" alt=""/>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== SCENE 02: STROM ============== -->
+  <div class="scene" data-scene="2" style="--scene-dur: 6s">
+    <div class="camera">
+      <div class="layer bg s02-bg depth-far">
+        <img src="../../../lernvideo-asset-system/asset-bibliothek/cinematic/szenen-bg/innen-computer-bg.svg" alt="" onerror="this.style.display='none'"/>
+      </div>
+      <div class="layer s02-source depth-mid">
+        <img src="../../../lernvideo-asset-system/asset-bibliothek/cinematic/flow/strom-quelle.svg" alt=""/>
+      </div>
+      <div class="layer s02-stream depth-near">
+        <img src="../../../lernvideo-asset-system/asset-bibliothek/cinematic/flow/elektron-stream.svg" alt=""/>
+      </div>
+      <div class="layer s02-board depth-mid">
+        <img src="../../../lernvideo-asset-system/asset-bibliothek/cinematic/hardware/motherboard-topdown.svg" alt=""/>
+      </div>
+      <div class="layer s02-pulse1 depth-near">
+        <img src="../../../lernvideo-asset-system/asset-bibliothek/cinematic/flow/pulse-electric.svg" alt=""/>
+      </div>
+      <div class="layer s02-pulse2 depth-near">
+        <img src="../../../lernvideo-asset-system/asset-bibliothek/cinematic/flow/pulse-electric.svg" alt=""/>
+      </div>
+      <div class="layer s02-arrow depth-near">
+        <img src="../../../lernvideo-asset-system/asset-bibliothek/cinematic/flow/strom-pfeil-rechts.svg" alt=""/>
+      </div>
+      <div class="big-number" id="big-number">10²³</div>
+    </div>
+  </div>
+
+  <!-- ============== SCENE 03: CPU + RAM ============== -->
+  <div class="scene" data-scene="3" style="--scene-dur: 7s">
+    <div class="camera">
+      <div class="layer bg s03-bg depth-far">
+        <img src="../../../lernvideo-asset-system/asset-bibliothek/cinematic/szenen-bg/innen-computer-bg.svg" alt="" onerror="this.style.display='none'"/>
+      </div>
+      <div class="layer s03-cpu depth-mid">
+        <img src="../../../lernvideo-asset-system/asset-bibliothek/cinematic/hardware/cpu-detail-cores.svg" alt=""/>
+      </div>
+      <div class="layer s03-chip depth-near">
+        <img src="../../../lernvideo-asset-system/asset-bibliothek/cinematic/tech-kern/cpu-chip-3d.svg" alt=""/>
+      </div>
+      <div class="layer s03-ram depth-mid">
+        <img src="../../../lernvideo-asset-system/asset-bibliothek/cinematic/hardware/ram-stick-3d.svg" alt=""/>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== SCENE 04: KERNEL ============== -->
+  <div class="scene" data-scene="4" style="--scene-dur: 7s">
+    <div class="camera">
+      <div class="layer bg s04-bg depth-far">
+        <img src="../../../lernvideo-asset-system/asset-bibliothek/cinematic/szenen-bg/innen-computer-bg.svg" alt="" onerror="this.style.display='none'"/>
+      </div>
+      <div class="layer s04-ribbons depth-far">
+        <img src="../../../lernvideo-asset-system/asset-bibliothek/cinematic/tech-kern/daten-ribbons.svg" alt=""/>
+      </div>
+      <div class="layer s04-portal depth-mid">
+        <img src="../../../lernvideo-asset-system/asset-bibliothek/cinematic/tech-kern/daten-portal.svg" alt=""/>
+      </div>
+      <div class="layer s04-strahl depth-near">
+        <img src="../../../lernvideo-asset-system/asset-bibliothek/cinematic/tech-kern/daten-strahl.svg" alt=""/>
+      </div>
+      <div class="layer s04-code depth-near">
+        <img src="../../../lernvideo-asset-system/asset-bibliothek/cinematic/tech-kern/code-stream.svg" alt=""/>
+      </div>
+      <div class="layer s04-terminal depth-near">
+        <img src="../../../lernvideo-asset-system/asset-bibliothek/cinematic/tech-kern/terminal-glas.svg" alt=""/>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== SCENE 05: PINGU FINALE ============== -->
+  <div class="scene" data-scene="5" style="--scene-dur: 5s">
+    <div class="camera">
+      <div class="layer bg s05-bg depth-far">
+        <img src="../../../lernvideo-asset-system/asset-bibliothek/cinematic/szenen-bg/innen-computer-bg.svg" alt="" onerror="this.style.display='none'"/>
+      </div>
+      <div class="s05-aura"></div>
+      <div class="layer s05-pingu depth-near">
+        <img src="../../../lernvideo-asset-system/asset-bibliothek/cinematic/menschen/pingu-winkend.svg" alt=""/>
+      </div>
+      <div class="s05-tagline">und so läuft alles.</div>
+      <div class="s05-brand">open-learn.app · linux grundlagen</div>
+    </div>
+  </div>
+
+  <!-- TRANSITIONS -->
+  <div class="cloud-wipe" id="cloud-wipe">
+    <img src="../../../lernvideo-asset-system/asset-bibliothek/cinematic/wolken/wolke-curtain-bottom.svg" alt=""/>
+  </div>
+  <div class="line-wipe" id="line-wipe"></div>
+
+  <!-- SUBTITLE -->
+  <div class="subtitle" id="subtitle">
+    <span class="tag" id="sub-tag">SZENE 01</span>
+    <span id="sub-text"></span>
+  </div>
+
+  <!-- HUD -->
+  <div class="hud-top">OPEN-LEARN.APP / LINUX-SHORT / 0001</div>
+  <div class="hud-right" id="hud-right">CINEMA 4K · 30 FPS</div>
+
+  <!-- PROGRESS -->
+  <div class="progress"><div class="progress-fill" id="progress-fill"></div></div>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <button id="btn-replay">⟲ REPLAY</button>
+    <span class="time" id="time-display">0:00 / 0:30</span>
+    <button id="btn-mute">🔊 MUTE</button>
+  </div>
+
+  <!-- TITLE CARD -->
+  <div class="title-card" id="title-card">
+    <h1>Wie Strom durch Linux fließt</h1>
+    <p>EIN 30-SEKUNDEN-SHORT · OPEN-LEARN.APP</p>
+    <button class="play-button" id="btn-play">▶ START</button>
+  </div>
+
+  <!-- AUDIO -->
+  <audio id="voiceover" preload="auto" src="voiceover.mp3"></audio>
+
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const TIMELINE = [
+    { scene: 1, start: 0.0,  end: 5.0,  text: 'Was passiert, wenn du <em>Enter</em> drückst?',                                tag: 'HOOK',     transOut: 'pan-down' },
+    { scene: 2, start: 5.0,  end: 11.0, text: 'Strom flutet durch dein Netzteil. <em>Milliarden Elektronen</em> pro Sekunde.', tag: 'STROM',    transOut: 'cloud' },
+    { scene: 3, start: 11.0, end: 18.0, text: 'Die CPU wacht auf. Der RAM lädt Befehle. Alles in <em>Mikrosekunden</em>.',     tag: 'CHIPS',    transOut: 'line' },
+    { scene: 4, start: 18.0, end: 25.0, text: 'Linux dirigiert. Daten fließen durch den <em>Kernel</em> — genau dorthin, wo sie hin sollen.', tag: 'KERNEL', transOut: 'iris' },
+    { scene: 5, start: 25.0, end: 30.0, text: 'Und so läuft alles. Jeder Tastendruck. <em>Jede Sekunde.</em>',                tag: 'FINALE',   transOut: null },
+  ];
+  const TOTAL_DURATION = 30.0;
+
+  const scenes = document.querySelectorAll('.scene');
+  const subtitle = document.getElementById('subtitle');
+  const subText = document.getElementById('sub-text');
+  const subTag = document.getElementById('sub-tag');
+  const progressFill = document.getElementById('progress-fill');
+  const timeDisplay = document.getElementById('time-display');
+  const voiceover = document.getElementById('voiceover');
+  const titleCard = document.getElementById('title-card');
+  const playBtn = document.getElementById('btn-play');
+  const replayBtn = document.getElementById('btn-replay');
+  const muteBtn = document.getElementById('btn-mute');
+  const cloudWipe = document.getElementById('cloud-wipe');
+  const lineWipe = document.getElementById('line-wipe');
+  const bigNumber = document.getElementById('big-number');
+
+  let currentSceneIdx = -1;
+  let startTime = 0;
+  let rafId = null;
+  let muted = false;
+
+  // PARTICLES INIT
+  const particlesEl = document.getElementById('particles');
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = (Math.random() * 100) + 'vw';
+    p.style.animationDuration = (8 + Math.random() * 10) + 's';
+    p.style.animationDelay = (Math.random() * 12) + 's';
+    const colors = ['#5AC8FF', '#A040FF', '#FFB84A', '#5AFF98'];
+    const c = colors[Math.floor(Math.random() * colors.length)];
+    p.style.background = c;
+    p.style.boxShadow = `0 0 8px ${c}`;
+    particlesEl.appendChild(p);
+  }
+
+  function fmt(t) {
+    const s = Math.max(0, Math.floor(t));
+    const m = Math.floor(s / 60);
+    const r = (s % 60).toString().padStart(2, '0');
+    return `${m}:${r}`;
+  }
+
+  function showSubtitle(text, tag) {
+    subText.innerHTML = text;
+    subTag.textContent = tag;
+    subtitle.classList.add('show');
+  }
+
+  function hideSubtitle() {
+    subtitle.classList.remove('show');
+  }
+
+  function activateScene(idx, prevTransOut) {
+    if (idx === currentSceneIdx) return;
+    const prev = currentSceneIdx;
+    currentSceneIdx = idx;
+    const newScene = scenes[idx];
+    const oldScene = prev >= 0 ? scenes[prev] : null;
+
+    // SUBTITLE swap
+    hideSubtitle();
+    setTimeout(() => {
+      const beat = TIMELINE[idx];
+      showSubtitle(beat.text, beat.tag);
+    }, 250);
+
+    // CSS classes for transitions
+    if (oldScene) {
+      oldScene.classList.remove('active', 'enter-pan-down', 'enter-line-right', 'enter-iris');
+      if (prevTransOut === 'pan-down') {
+        oldScene.classList.add('exit-pan-down');
+        setTimeout(() => oldScene.classList.remove('exit-pan-down'), 900);
+      } else if (prevTransOut === 'cloud') {
+        cloudWipe.classList.remove('active');
+        void cloudWipe.offsetWidth;
+        cloudWipe.classList.add('active');
+      } else if (prevTransOut === 'line') {
+        oldScene.classList.add('exit-line-left');
+        lineWipe.classList.remove('active');
+        void lineWipe.offsetWidth;
+        lineWipe.classList.add('active');
+        setTimeout(() => oldScene.classList.remove('exit-line-left'), 1100);
+      } else if (prevTransOut === 'iris') {
+        oldScene.classList.add('exit-iris');
+        setTimeout(() => oldScene.classList.remove('exit-iris'), 1000);
+      }
+    }
+
+    // ENTER new scene
+    requestAnimationFrame(() => {
+      if (prevTransOut === 'pan-down') {
+        newScene.classList.add('enter-pan-down', 'active');
+      } else if (prevTransOut === 'line') {
+        newScene.classList.add('enter-line-right', 'active');
+      } else if (prevTransOut === 'iris') {
+        // delay slight to let exit start
+        setTimeout(() => newScene.classList.add('enter-iris', 'active'), 200);
+      } else {
+        newScene.classList.add('active');
+      }
+    });
+  }
+
+  function tick() {
+    const t = voiceover.currentTime;
+    // SCENE
+    let targetIdx = 0;
+    for (let i = 0; i < TIMELINE.length; i++) {
+      if (t >= TIMELINE[i].start && t < TIMELINE[i].end + (i === TIMELINE.length - 1 ? 1.0 : 0)) {
+        targetIdx = i;
+        break;
+      }
+      if (i === TIMELINE.length - 1 && t >= TIMELINE[i].start) targetIdx = i;
+    }
+    if (targetIdx !== currentSceneIdx) {
+      const prevTransOut = currentSceneIdx >= 0 ? TIMELINE[currentSceneIdx].transOut : null;
+      activateScene(targetIdx, prevTransOut);
+    }
+
+    // PROGRESS
+    const pct = Math.min(100, (t / TOTAL_DURATION) * 100);
+    progressFill.style.width = pct + '%';
+    timeDisplay.textContent = `${fmt(t)} / ${fmt(TOTAL_DURATION)}`;
+
+    // BIG NUMBER COUNTER (S2: 10^23 doesn't animate, but show after 1s)
+    if (currentSceneIdx === 1) bigNumber.textContent = '10²³';
+
+    if (t < TOTAL_DURATION + 1.5) {
+      rafId = requestAnimationFrame(tick);
+    } else {
+      // End — show replay state
+      hideSubtitle();
+    }
+  }
+
+  function play() {
+    titleCard.classList.add('gone');
+    voiceover.currentTime = 0;
+    voiceover.play().catch(e => console.warn('audio play blocked', e));
+    startTime = performance.now();
+    activateScene(0, null);
+    showSubtitle(TIMELINE[0].text, TIMELINE[0].tag);
+    cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function replay() {
+    cancelAnimationFrame(rafId);
+    scenes.forEach(s => s.classList.remove('active', 'exit-pan-down', 'exit-line-left', 'exit-iris',
+                                             'enter-pan-down', 'enter-line-right', 'enter-iris'));
+    cloudWipe.classList.remove('active');
+    lineWipe.classList.remove('active');
+    currentSceneIdx = -1;
+    progressFill.style.width = '0%';
+    play();
+  }
+
+  playBtn.addEventListener('click', play);
+  replayBtn.addEventListener('click', replay);
+  muteBtn.addEventListener('click', () => {
+    muted = !muted;
+    voiceover.muted = muted;
+    muteBtn.textContent = muted ? '🔇 UNMUTE' : '🔊 MUTE';
+  });
+
+  // KEYBOARD
+  document.addEventListener('keydown', (e) => {
+    if (e.key === ' ') { e.preventDefault(); if (voiceover.paused) play(); else voiceover.pause(); }
+    if (e.key === 'r' || e.key === 'R') replay();
+  });
+
+  // AUTO-PLAY HINT
+  voiceover.addEventListener('ended', () => {
+    cancelAnimationFrame(rafId);
+  });
+})();
+</script>
+
+</body>
+</html>
